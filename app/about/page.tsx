@@ -49,7 +49,7 @@ export default function AboutPage() {
     {
       name: "Sarah Putri",
       role: "CTO",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=face",
       bio: "Tech enthusiast focused on building scalable and user-friendly platforms.",
     },
     {
