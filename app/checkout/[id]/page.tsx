@@ -12,19 +12,37 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import Image from "next/image"
 
+// Define the structure of the ticket types
+interface TicketType {
+  id: any;
+  name: string;
+  price: number;
+  description: string;
+}
+
+// Define the structure for the event and other related data
+interface Event {
+  id: any;
+  title: string;
+  date: string;
+  location: string;
+  image: string;
+  ticketTypes: TicketType[];
+}
+
 export default function CheckoutPage() {
   const params = useParams()
-  const [timeLeft, setTimeLeft] = useState(7200) // 2 hours in seconds
-  const [selectedTickets, setSelectedTickets] = useState({
+  const [timeLeft, setTimeLeft] = useState<number>(7200) // 2 hours in seconds
+  const [selectedTickets, setSelectedTickets] = useState<{ [key: string]: number }>({
     regular: 1,
     vip: 0,
   })
-  const [promoCode, setPromoCode] = useState("")
-  const [usePoints, setUsePoints] = useState(false)
-  const [pointsToUse, setPointsToUse] = useState(0)
+  const [promoCode, setPromoCode] = useState<string>("")
+  const [usePoints, setUsePoints] = useState<boolean>(false)
+  const [pointsToUse, setPointsToUse] = useState<number>(0)
 
-  // Mock data
-  const event = {
+  // Mock data for the event
+  const event: Event = {
     id: params.id,
     title: "Tech Conference 2024",
     date: "March 15, 2024",

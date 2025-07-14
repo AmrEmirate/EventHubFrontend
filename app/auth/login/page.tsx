@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-
+import axios from 'axios';
 import { useState } from "react"
 import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
@@ -11,18 +11,44 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
+// Define the state type
+interface FormData {
+  email: string;
+  password: string;
+}
+
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [formData, setFormData] = useState({
+  const [showPassword, setShowPassword] = useState<boolean>(false); // Untuk toggle password visibility
+  const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
-  })
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Handle login logic here
-    console.log("Login attempt:", formData)
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // Mengirim data login ke backend menggunakan Axios
+      interface LoginResponse {
+        token: string;
+      }
+
+      const response = await axios.post<LoginResponse>('http://localhost:8000/api/v1/auth/login', {
+        email: formData.email,
+        password: formData.password,
+      });
+
+      // Menangani respon sukses (misalnya, menyimpan token di localStorage)
+      console.log("Login berhasil:", response.data);
+      // Misalnya menyimpan token:
+      localStorage.setItem('authToken', response.data.token);
+
+      // Redirect atau tampilan lanjutan
+      window.location.href = '/dashboard'; // Arahkan ke halaman dashboard setelah login sukses
+    } catch (error) {
+      console.error("Login gagal:", error);
+      alert("Login gagal! Cek kembali email dan password.");
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
@@ -40,7 +66,7 @@ export default function LoginPage() {
                 type="email"
                 placeholder="Enter your email"
                 value={formData.email}
-                onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
               />
             </div>
@@ -49,10 +75,10 @@ export default function LoginPage() {
               <div className="relative">
                 <Input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
                   value={formData.password}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required
                 />
                 <Button
@@ -66,31 +92,20 @@ export default function LoginPage() {
                 </Button>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
-                Forgot password?
-              </Link>
-            </div>
-            <Button type="submit" className="w-full">
-              Sign In
-            </Button>
+            <Button type="submit" className="w-full">Sign In</Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <Separator />
           <p className="text-sm text-center text-muted-foreground">
-            Don't have an account?{" "}
-            <Link href="/auth/register" className="text-primary hover:underline">
-              Sign up
-            </Link>
+            Don’t have an account?{' '}
+            <Link href="/auth/register" className="text-primary hover:underline">Sign up</Link>
           </p>
           <p className="text-xs text-center text-muted-foreground">
-            <Link href="/" className="hover:underline">
-              ← Back to Home
-            </Link>
+            <Link href="/" className="hover:underline">Back to Home</Link>
           </p>
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-
+import axios from 'axios';
 import { useState } from "react"
 import Link from "next/link"
 import { Eye, EyeOff, User, Building } from "lucide-react"
@@ -27,14 +27,39 @@ export default function RegisterPage() {
     bio: "",
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validasi password
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords don't match!")
       return
     }
-    // Handle registration logic here
-    console.log("Registration attempt:", formData)
+
+    // Validasi email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email)) {
+      alert("Please enter a valid email address.")
+      return
+    }
+
+    // Validasi password (minimal 8 karakter)
+    if (formData.password.length < 8) {
+      alert("Password must be at least 8 characters long.")
+      return
+    }
+
+    // Kirim data form ke backend
+    try {
+      const response = await axios.post("http://localhost:8000/api/v1/auth/register", formData)
+      console.log("Registration successful:", response.data)
+      
+      // Redirect ke halaman login setelah registrasi berhasil
+      window.location.href = "/auth/login"
+    } catch (error) {
+      console.error("Registration failed:", error)
+      alert("Registration failed! Please try again.")
+    }
   }
 
   const generateReferralCode = () => {

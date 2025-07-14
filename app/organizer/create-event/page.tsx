@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Calendar, MapPin, DollarSign, Tag, Plus, X } from "lucide-react"
@@ -14,29 +13,49 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 
+// Define the structure of ticket type
 interface TicketType {
-  id: string
-  name: string
-  price: number
-  description: string
-  quantity: number
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  quantity: number;
 }
 
+// Define the structure for promotions
 interface Promotion {
-  id: string
-  title: string
-  description: string
-  discountType: "percentage" | "fixed"
-  discountValue: number
-  code: string
-  startDate: string
-  endDate: string
-  usageLimit: number
+  id: string;
+  title: string;
+  description: string;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  code: string;
+  startDate: string;
+  endDate: string;
+  usageLimit: number;
+}
+
+// Define the structure for the formData and related state
+interface FormData {
+  title: string;
+  description: string;
+  longDescription: string;
+  category: string;
+  startDate: string;
+  endDate: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  fullAddress: string;
+  isFree: boolean;
+  totalSeats: number;
+  image: File | null;
 }
 
 export default function CreateEventPage() {
   const router = useRouter()
-  const [formData, setFormData] = useState({
+  
+  const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
     longDescription: "",
@@ -49,7 +68,7 @@ export default function CreateEventPage() {
     fullAddress: "",
     isFree: false,
     totalSeats: 0,
-    image: null as File | null,
+    image: null,
   })
 
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
@@ -63,7 +82,7 @@ export default function CreateEventPage() {
   ])
 
   const [promotions, setPromotions] = useState<Promotion[]>([])
-  const [showPromotionForm, setShowPromotionForm] = useState(false)
+  const [showPromotionForm, setShowPromotionForm] = useState<boolean>(false)
   const [newPromotion, setNewPromotion] = useState<Omit<Promotion, "id">>({
     title: "",
     description: "",
