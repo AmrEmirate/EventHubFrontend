@@ -2,13 +2,17 @@ import axios from 'axios';
 
 // --- Definisi Tipe Data (Interface) ---
 
+interface SimpleMessageResponse {
+  message: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
   points: number;
   referralCode: string | null;
-  phone: string | null; // <-- PERBAIKAN: 'phone' ada di sini
+  phone: string | null;
   profile: {
     bio: string | null;
     avatarUrl: string | null;
@@ -20,7 +24,6 @@ interface LoginResponse {
   token: string;
   user: UserProfile; 
 }
-
 
 export interface Event {
   id: string;
@@ -88,24 +91,6 @@ export interface Attendee {
   createdAt: string;
 }
 
-interface UpdateProfileResponse {
-  message: string;
-  data: UserProfile;
-}
-
-interface CreateTransactionData {
-  eventId: string;
-  quantity: number;
-  voucherCode?: string;
-  usePoints?: boolean;
-}
-
-interface CreateReviewData {
-  eventId: string;
-  rating: number;
-  comment?: string;
-}
-
 // --- Konfigurasi Instance Axios ---
 const api = axios.create({
   baseURL: 'http://localhost:8000/api/v1',
@@ -114,7 +99,6 @@ const api = axios.create({
   },
 });
 
-// Interceptors
 api.interceptors.request.use(
   (config) => {
     if (!config.headers) config.headers = {};
@@ -140,17 +124,20 @@ api.interceptors.response.use(
   }
 );
 
-
 // --- Kumpulan Fungsi API ---
 
 // Auth
 export const login = (data: any) => api.post<LoginResponse>('/auth/login', data);
-export const register = (data: any) => api.post('/auth/register', data);
+export const register = (data: any) => api.post<SimpleMessageResponse>('/auth/register', data);
+export const verifyEmail = (token: string) => api.get<SimpleMessageResponse>(`/auth/verify-email?token=${token}`);
+export const forgotPassword = (email: string) => api.post<SimpleMessageResponse>('/auth/forgot-password', { email });
+export const resetPassword = (data: { token: string; newPassword: string }) => api.post<SimpleMessageResponse>('/auth/reset-password', data);
 
 // User Profile
 export const getMyProfile = () => api.get<UserProfile>('/users/me');
 export const updateMyProfile = (data: { name?: string; bio?: string; phone?: string }) => 
-  api.put<UpdateProfileResponse>('/users/me', data);
+  api.put<{ message: string, data: UserProfile }>('/users/me', data);
+export const changePassword = (data: any) => api.put<SimpleMessageResponse>('/users/me/change-password', data);
 
 // Events
 export const getEvents = (params?: any) => api.get<Event[]>('/events', { params });
@@ -165,10 +152,10 @@ export const getMyVouchers = () => api.get<Voucher[]>('/vouchers/me');
 
 // Transactions
 export const getMyTransactions = () => api.get<Transaction[]>('/transactions/me');
-export const createTransaction = (data: CreateTransactionData) => api.post('/transactions', data);
+export const createTransaction = (data: { eventId: string; quantity: number; voucherCode?: string; usePoints?: boolean }) => api.post('/transactions', data);
 
 // Reviews
-export const createReview = (data: CreateReviewData) => api.post('/reviews', data);
+export const createReview = (data: { eventId: string; rating: number; comment?: string }) => api.post('/reviews', data);
 
 // --- Fungsi untuk Organizer ---
 export const getOrganizerTransactions = () => api.get<OrganizerTransaction[]>('/transactions/organizer');
@@ -179,14 +166,10 @@ export const getEventAttendees = (eventId: string) => api.get<Attendee[]>(`/even
 // Dashboard
 export const getOrganizerDashboard = () => api.get<OrganizerDashboardData>('/dashboard');
 
-// [PERBAIKAN] Pastikan fungsi ini diekspor
-export const changePassword = (data: any) => api.put('/users/me/change-password', data);
-
 // File Upload
 export const uploadPaymentProof = (transactionId: string, proofData: FormData) => {
-  return api.post(`/transactions/${transactionId}/upload`, proofData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  return api.post(`/transactions/${transactionId}/upload`, proofData);
 };
 
-export default api;
+// [PERBAIKAN] Baris di bawah ini dihapus untuk memperbaiki error
+// export default api;

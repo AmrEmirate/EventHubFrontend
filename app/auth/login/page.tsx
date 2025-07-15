@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useAuth } from "@/context/AuthContext"; // Impor hook useAuth
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
-  const { login } = useAuth(); // Ambil fungsi login dari context
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -31,21 +31,12 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      // [PERBAIKAN UTAMA] Langsung panggil fungsi login dari context
-      // dengan mengirimkan data dari form.
       await login(formData);
-      
-      // Navigasi dan penyimpanan state akan diurus sepenuhnya oleh AuthContext.
-
+      // Navigasi akan diurus oleh AuthContext
     } catch (err: any) {
       console.error("Login gagal:", err);
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("Login gagal! Cek kembali email dan password.");
-      }
+      setError(err.response?.data?.message || "Login gagal! Cek kembali email dan password.");
     } finally {
-      // Pastikan loading berhenti setelah proses selesai (baik berhasil atau gagal)
       setLoading(false); 
     }
   };
@@ -93,6 +84,13 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {/* [PENAMBAHAN] Link Lupa Password di atas tombol Sign In */}
+            <div className="text-sm text-right">
+                <Link href="/auth/forgot-password" className="underline hover:text-primary">
+                    Lupa Password?
+                </Link>
+            </div>
+
             {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
             <Button type="submit" className="w-full" disabled={loading}>
@@ -101,11 +99,10 @@ export default function LoginPage() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
-          <Separator />
-          <p className="text-sm text-center text-muted-foreground">
-            Don’t have an account?{' '}
-            <Link href="/auth/register" className="text-primary hover:underline">Sign up</Link>
+        <CardFooter>
+          <p className="text-sm text-center text-muted-foreground w-full">
+            Belum punya akun?{' '}
+            <Link href="/auth/register" className="text-primary hover:underline font-semibold">Sign up</Link>
           </p>
         </CardFooter>
       </Card>
