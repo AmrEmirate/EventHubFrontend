@@ -3,8 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import Header from "@/components/layout/Header";
-// 1. Impor Toaster
-import { Toaster } from 'react-hot-toast';
+// [PERBAIKAN] Impor Toaster dari sonner yang sudah kita install
+import { Toaster } from "@/components/ui/sonner"; 
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,10 +25,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          {/* 2. Tambahkan komponen Toaster di sini */}
-          <Toaster position="top-center" reverseOrder={false} />
           <Header />
           <main>{children}</main>
+          {/* [PERBAIKAN] Gunakan komponen Toaster dari sonner */}
+          <Toaster richColors position="top-right" closeButton />
         </AuthProvider>
       </body>
     </html>

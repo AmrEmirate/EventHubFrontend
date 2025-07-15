@@ -1,5 +1,3 @@
-// frontend/app/auth/login/page.tsx
-
 "use client";
 
 import React, { useState } from "react";
@@ -10,11 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useAuth } from "@/context/AuthContext"; // 1. Impor hook useAuth
-import { login as loginApi } from "../../../lib/apihelper"; // 2. Ganti nama fungsi API agar tidak konflik
+import { useAuth } from "@/context/AuthContext"; // Impor hook useAuth
 
 export default function LoginPage() {
-  const { login } = useAuth(); // 3. Ambil fungsi login dari context
+  const { login } = useAuth(); // Ambil fungsi login dari context
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -34,13 +31,11 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      // Panggil API secara langsung
-      const response = await loginApi(formData);
+      // [PERBAIKAN UTAMA] Langsung panggil fungsi login dari context
+      // dengan mengirimkan data dari form.
+      await login(formData);
       
-      // 4. Panggil fungsi login dari context dengan token yang didapat
-      login(response.data.token);
-
-      // Navigasi akan ditangani oleh AuthContext setelah profil berhasil diambil
+      // Navigasi dan penyimpanan state akan diurus sepenuhnya oleh AuthContext.
 
     } catch (err: any) {
       console.error("Login gagal:", err);
@@ -49,9 +44,10 @@ export default function LoginPage() {
       } else {
         setError("Login gagal! Cek kembali email dan password.");
       }
-      setLoading(false); // Pastikan loading berhenti jika ada error
+    } finally {
+      // Pastikan loading berhenti setelah proses selesai (baik berhasil atau gagal)
+      setLoading(false); 
     }
-    // `finally` dihapus karena loading dan navigasi dikelola oleh context
   };
 
   return (

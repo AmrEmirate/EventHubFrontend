@@ -1,7 +1,26 @@
-// frontend/apihelper.ts
 import axios from 'axios';
 
 // --- Definisi Tipe Data (Interface) ---
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  points: number;
+  referralCode: string | null;
+  phone: string | null; // <-- PERBAIKAN: 'phone' ada di sini
+  profile: {
+    bio: string | null;
+    avatarUrl: string | null;
+  } | null;
+  role: 'CUSTOMER' | 'ORGANIZER';
+}
+
+interface LoginResponse {
+  token: string;
+  user: UserProfile; 
+}
+
 
 export interface Event {
   id: string;
@@ -16,19 +35,6 @@ export interface Event {
   category: string;
   ticketTotal: number;
   ticketSold: number;
-}
-
-export interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  points: number;
-  referralCode: string | null;
-  profile: {
-    bio: string | null;
-    avatarUrl: string | null;
-    phone: string | null;
-  } | null;
 }
 
 export interface Voucher {
@@ -54,10 +60,16 @@ export interface Transaction {
   };
 }
 
-export interface OrganizerStats {
-  revenue: number;
-  ticketsSold: number;
-  totalEvents: number;
+export interface OrganizerDashboardData {
+  stats: {
+    revenue: number;
+    ticketsSold: number;
+    totalEvents: number;
+  };
+  analytics: {
+    revenuePerDay: { date: string; total: number }[];
+    ticketsPerEvent: { eventName: string; sold: number }[];
+  };
 }
 
 export interface OrganizerTransaction extends Transaction {
@@ -74,16 +86,6 @@ export interface Attendee {
   };
   quantity: number;
   createdAt: string;
-}
-
-// Perbaikan: Tambahkan tipe data untuk Analytics
-export interface AnalyticsData {
-  revenuePerDay: { date: string; total: number }[];
-  ticketsPerEvent: { eventName: string; sold: number }[];
-}
-
-interface LoginResponse {
-  token: string;
 }
 
 interface UpdateProfileResponse {
@@ -112,7 +114,7 @@ const api = axios.create({
   },
 });
 
-// Interceptors (Tidak berubah)
+// Interceptors
 api.interceptors.request.use(
   (config) => {
     if (!config.headers) config.headers = {};
@@ -153,7 +155,7 @@ export const updateMyProfile = (data: { name?: string; bio?: string; phone?: str
 // Events
 export const getEvents = (params?: any) => api.get<Event[]>('/events', { params });
 export const getEventBySlug = (slug: string) => api.get<Event>(`/events/${slug}`);
-export const getMyOrganizerEvents = () => api.get<Event[]>('/organizer/my-events');
+export const getMyOrganizerEvents = () => api.get<Event[]>('/events/organizer/my-events');
 export const createEvent = (data: any) => api.post('/events', data);
 export const updateEvent = (eventId: string, data: any) => api.put(`/events/${eventId}`, data);
 export const deleteEvent = (eventId: string) => api.delete(`/events/${eventId}`);
@@ -175,9 +177,10 @@ export const rejectTransaction = (transactionId: string) => api.post(`/transacti
 export const getEventAttendees = (eventId: string) => api.get<Attendee[]>(`/events/${eventId}/attendees`);
 
 // Dashboard
-export const getOrganizerStats = () => api.get<OrganizerStats>('/dashboard/stats');
-// Perbaikan: Tambahkan fungsi untuk Analytics
-export const getOrganizerAnalytics = () => api.get<AnalyticsData>('/dashboard/analytics');
+export const getOrganizerDashboard = () => api.get<OrganizerDashboardData>('/dashboard');
+
+// [PERBAIKAN] Pastikan fungsi ini diekspor
+export const changePassword = (data: any) => api.put('/users/me/change-password', data);
 
 // File Upload
 export const uploadPaymentProof = (transactionId: string, proofData: FormData) => {
