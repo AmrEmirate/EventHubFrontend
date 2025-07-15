@@ -38,6 +38,7 @@ export interface Event {
   category: string;
   ticketTotal: number;
   ticketSold: number;
+  imageUrl?: string | null;
 }
 
 export interface Voucher {
@@ -163,6 +164,8 @@ export const approveTransaction = (transactionId: string) => api.post(`/transact
 export const rejectTransaction = (transactionId: string) => api.post(`/transactions/organizer/${transactionId}/reject`);
 export const getEventAttendees = (eventId: string) => api.get<Attendee[]>(`/events/${eventId}/attendees`);
 
+export const getPointPrizes = () => api.get('/points/prizes');
+export const redeemPointPrize = (prizeId: string) => api.post('/points/redeem', { prizeId });
 // Dashboard
 export const getOrganizerDashboard = () => api.get<OrganizerDashboardData>('/dashboard');
 

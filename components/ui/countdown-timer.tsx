@@ -4,14 +4,9 @@ import { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Timer } from 'lucide-react';
 
-// Fungsi untuk menghitung selisih waktu
 const calculateTimeLeft = (deadline: string) => {
     const difference = +new Date(deadline) - +new Date();
-    let timeLeft = {
-        hours: 0,
-        minutes: 0,
-        seconds: 0
-    };
+    let timeLeft = { hours: 0, minutes: 0, seconds: 0 };
 
     if (difference > 0) {
         timeLeft = {
@@ -23,17 +18,13 @@ const calculateTimeLeft = (deadline: string) => {
     return timeLeft;
 };
 
-// Komponen Countdown Timer
 export default function CountdownTimer({ deadline }: { deadline: string }) {
     const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(deadline));
 
     useEffect(() => {
-        // Update countdown setiap detik
         const timer = setTimeout(() => {
             setTimeLeft(calculateTimeLeft(deadline));
         }, 1000);
-
-        // Hentikan timer jika komponen dilepas
         return () => clearTimeout(timer);
     });
 
