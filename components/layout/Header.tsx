@@ -3,9 +3,10 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarDays, LogOut, User } from "lucide-react";
+// 1. Tambahkan "Building" dari lucide-react
+import { CalendarDays, LogOut, User, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/AuthContext"; // Impor hook kita
+import { useAuth } from "@/context/AuthContext"; 
 import { 
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
     DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger 
@@ -45,7 +46,12 @@ export default function Header() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <Link href="/profile"><DropdownMenuItem className="cursor-pointer"><User className="mr-2 h-4 w-4" />Profil</DropdownMenuItem></Link>
-                  <DropdownMenuItem onClick={logout} className="text-red-500 cursor-pointer">
+                  
+                  {/* 2. Tambahkan baris ini untuk tautan ke dashboard organizer */}
+                  <Link href="/organizer/dashboard"><DropdownMenuItem className="cursor-pointer"><Building className="mr-2 h-4 w-4" />Organizer Dashboard</DropdownMenuItem></Link>
+                  
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout} className="text-red-500 focus:text-red-500 cursor-pointer">
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
                   </DropdownMenuItem>

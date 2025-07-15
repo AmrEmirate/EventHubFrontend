@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-// 1. Impor AuthProvider dan Header
 import { AuthProvider } from "@/context/AuthContext";
 import Header from "@/components/layout/Header";
+// 1. Impor Toaster
+import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,11 +24,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {/* 2. Bungkus semua konten dengan AuthProvider */}
         <AuthProvider>
-          {/* 3. Gunakan Header dinamis di sini */}
+          {/* 2. Tambahkan komponen Toaster di sini */}
+          <Toaster position="top-center" reverseOrder={false} />
           <Header />
-          {/* 4. Semua halaman lain akan dirender di dalam {children} */}
           <main>{children}</main>
         </AuthProvider>
       </body>
