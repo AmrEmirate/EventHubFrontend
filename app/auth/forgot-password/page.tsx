@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, CheckCircle } from 'lucide-react';
+import { Loader2, CheckCircle, ArrowLeft } from 'lucide-react';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Format email tidak valid.'),
@@ -33,13 +33,14 @@ export default function ForgotPasswordPage() {
       const res = await forgotPassword(data.email);
       setSuccessMessage(res.data.message);
     } catch (err: any) {
-      // Untuk keamanan, kita tidak menampilkan error spesifik
-      setSuccessMessage("Jika email Anda terdaftar, Anda akan menerima link reset password.");
+      // Untuk keamanan, kita tidak menampilkan error spesifik, tapi tetap memberikan feedback positif.
+      setSuccessMessage("Jika email Anda terdaftar dan terverifikasi, Anda akan menerima link untuk mereset password.");
     } finally {
       setLoading(false);
     }
   };
 
+  // Tampilan setelah form dikirim
   if (successMessage) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -55,12 +56,13 @@ export default function ForgotPasswordPage() {
     );
   }
 
+  // Tampilan form utama
   return (
-    <div className="flex items-center justify-center min-h-screen p-4">
+    <div className="flex items-center justify-center min-h-screen p-4 bg-gray-50">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">Lupa Password</CardTitle>
-          <CardDescription>Masukkan email Anda, kami akan mengirimkan link untuk mereset password Anda.</CardDescription>
+          <CardDescription>Masukkan email Anda. Kami akan mengirimkan link untuk mereset password Anda.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -82,6 +84,9 @@ export default function ForgotPasswordPage() {
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Kirim Link Reset
               </Button>
+               <Button variant="link" className="w-full" asChild>
+                    <Link href="/auth/login"><ArrowLeft className="h-4 w-4 mr-2"/>Batal</Link>
+                </Button>
             </form>
           </Form>
         </CardContent>

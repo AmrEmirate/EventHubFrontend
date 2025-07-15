@@ -104,10 +104,9 @@ function ResetPasswordComponent() {
     );
 }
 
-// Gunakan Suspense agar useSearchParams bisa bekerja dengan baik
 export default function ResetPasswordPage() {
     return (
-        <div className="flex items-center justify-center min-h-screen p-4">
+        <div className="flex items-center justify-center min-h-screen p-4 bg-gray-50">
             <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin"/>}>
                 <ResetPasswordComponent />
             </Suspense>
