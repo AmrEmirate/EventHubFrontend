@@ -8,9 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Upload, CheckCircle, Clock, XCircle, ArrowLeft } from 'lucide-react';
 import { getMyTransactions, uploadPaymentProof, Transaction } from '@/lib/apihelper';
-import { toast } from "sonner"; // [PERBAIKAN] Impor dari sonner
+import { toast } from "sonner";
 import CountdownTimer from '@/components/ui/countdown-timer';
-import PaymentInstructions from '@/components/payment-instructions';
+import PaymentInstructions from '../components/payment-instructions'; // Jalur impor yang diperbaiki
 
 const TransactionStatusBadge = ({ status }: { status: Transaction['status'] }) => {
     const statusInfo = {

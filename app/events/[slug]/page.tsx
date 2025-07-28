@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Image from "next/image"; // Cukup satu impor Image
+import Image from "next/image";
 import Link from "next/link";
 import { Calendar, MapPin, Users, ArrowLeft, Loader2, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { getEventBySlug, Event } from "@/lib/apihelper"; // Path yang lebih bersih
-import ReviewForm from "@/components/reviews/review-form"; // Impor form review
+import { getEventBySlug, Event } from "@/lib/apihelper";
+import { ReviewForm } from "@/components/reviews/review-form";
 
 export default function EventDetailPage() {
   const [event, setEvent] = useState<Event | null>(null);
