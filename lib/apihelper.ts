@@ -47,6 +47,10 @@ export interface Voucher {
   discountPercent: number;
   expiresAt: string;
   maxDiscount?: number | null;
+  // [TAMBAHAN] Properti baru untuk menampung detail event
+  event?: {
+    name: string;
+  } | null;
 }
 
 export interface Transaction {
@@ -56,6 +60,7 @@ export interface Transaction {
   finalPrice: number;
   createdAt: string;
   paymentDeadline: string;
+  paymentProofUrl?: string | null;
   event: {
     id: string;
     name: string;
@@ -102,10 +107,14 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    if (!config.headers) config.headers = {};
+    if (!config.headers) {
+        config.headers = {};
+    }
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('authToken');
-      if (token) config.headers.Authorization = `Bearer ${token}`;
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -139,6 +148,13 @@ export const getMyProfile = () => api.get<UserProfile>('/users/me');
 export const updateMyProfile = (data: { name?: string; bio?: string; phone?: string }) => 
   api.put<{ message: string, data: UserProfile }>('/users/me', data);
 export const changePassword = (data: any) => api.put<SimpleMessageResponse>('/users/me/change-password', data);
+export const updateMyAvatar = (avatarData: FormData) => {
+  return api.put('/users/me/avatar', avatarData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
 
 // Events
 export const getEvents = (params?: any) => api.get<Event[]>('/events', { params });
@@ -150,6 +166,7 @@ export const deleteEvent = (eventId: string) => api.delete(`/events/${eventId}`)
 
 // Vouchers
 export const getMyVouchers = () => api.get<Voucher[]>('/vouchers/me');
+export const createOrganizerVoucher = (data: any) => api.post('/vouchers/organizer', data);
 
 // Transactions
 export const getMyTransactions = () => api.get<Transaction[]>('/transactions/me');
@@ -171,8 +188,9 @@ export const getOrganizerDashboard = () => api.get<OrganizerDashboardData>('/das
 
 // File Upload
 export const uploadPaymentProof = (transactionId: string, proofData: FormData) => {
-  return api.post(`/transactions/${transactionId}/upload`, proofData);
+  return api.post(`/transactions/${transactionId}/upload`, proofData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
 };
-
-// [PERBAIKAN] Baris di bawah ini dihapus untuk memperbaiki error
-// export default api;
