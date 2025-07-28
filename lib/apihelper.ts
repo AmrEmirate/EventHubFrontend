@@ -47,7 +47,6 @@ export interface Voucher {
   discountPercent: number;
   expiresAt: string;
   maxDiscount?: number | null;
-  // [TAMBAHAN] Properti baru untuk menampung detail event
   event?: {
     name: string;
   } | null;
@@ -66,7 +65,12 @@ export interface Transaction {
     name: string;
     slug: string;
     startDate: string;
+    location?: string;
   };
+  user: { 
+      name: string;
+      email: string;
+  }
 }
 
 export interface OrganizerDashboardData {
@@ -94,6 +98,13 @@ export interface Attendee {
     email: string;
   };
   quantity: number;
+  createdAt: string;
+}
+
+export interface Notification {
+  id: string;
+  message: string;
+  isRead: boolean;
   createdAt: string;
 }
 
@@ -171,9 +182,14 @@ export const createOrganizerVoucher = (data: any) => api.post('/vouchers/organiz
 // Transactions
 export const getMyTransactions = () => api.get<Transaction[]>('/transactions/me');
 export const createTransaction = (data: { eventId: string; quantity: number; voucherCode?: string; usePoints?: boolean }) => api.post('/transactions', data);
+export const getTransactionById = (transactionId: string) => api.get<Transaction>(`/transactions/${transactionId}`);
 
 // Reviews
 export const createReview = (data: { eventId: string; rating: number; comment?: string }) => api.post('/reviews', data);
+
+// Notifications
+export const getMyNotifications = () => api.get<Notification[]>('/notifications/me');
+export const markNotificationsAsRead = () => api.post('/notifications/me/mark-as-read');
 
 // --- Fungsi untuk Organizer ---
 export const getOrganizerTransactions = () => api.get<OrganizerTransaction[]>('/transactions/organizer');
@@ -181,8 +197,6 @@ export const approveTransaction = (transactionId: string) => api.post(`/transact
 export const rejectTransaction = (transactionId: string) => api.post(`/transactions/organizer/${transactionId}/reject`);
 export const getEventAttendees = (eventId: string) => api.get<Attendee[]>(`/events/${eventId}/attendees`);
 
-export const getPointPrizes = () => api.get('/points/prizes');
-export const redeemPointPrize = (prizeId: string) => api.post('/points/redeem', { prizeId });
 // Dashboard
 export const getOrganizerDashboard = () => api.get<OrganizerDashboardData>('/dashboard');
 

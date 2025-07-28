@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { getMyProfile, login as apiLogin, UserProfile } from '@/lib/apihelper'; 
+import { getMyProfile, login as apiLogin, UserProfile, getMyNotifications, Notification } from '@/lib/apihelper'; 
 
 // Definisikan tipe untuk context
 interface AuthContextType {
@@ -11,7 +11,10 @@ interface AuthContextType {
   login: (credentials: any) => Promise<void>;
   logout: () => void;
   loading: boolean;
-  fetchUser: () => Promise<void>; // <-- Tambahkan ini
+  fetchUser: () => Promise<void>;
+  // [BARU] Tambahkan state dan fungsi untuk notifikasi
+  notifications: Notification[];
+  fetchNotifications: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,9 +22,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  // [BARU] State untuk notifikasi
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const router = useRouter();
 
-  // Fungsi yang bisa dipanggil untuk me-refresh data user
   const fetchUser = async () => {
     const token = localStorage.getItem('authToken');
     if (token) {
@@ -35,14 +39,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
   };
+  
+  // [BARU] Fungsi untuk mengambil notifikasi
+  const fetchNotifications = async () => {
+      if (!localStorage.getItem('authToken')) return;
+      try {
+          const res = await getMyNotifications();
+          setNotifications(res.data);
+      } catch (error) {
+          console.error("Gagal mengambil notifikasi:", error);
+      }
+  };
 
   useEffect(() => {
     const checkUserSession = async () => {
       await fetchUser();
+      await fetchNotifications(); // Ambil notifikasi saat user pertama kali login
       setLoading(false);
     };
 
     checkUserSession();
+
+    // Set interval untuk memeriksa notifikasi baru setiap 1 menit
+    const interval = setInterval(() => {
+        fetchNotifications();
+    }, 60000); // 60 detik
+
+    return () => clearInterval(interval); // Hapus interval saat komponen di-unmount
+
   }, []);
 
   const login = async (credentials: any) => {
@@ -52,9 +76,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { token, user: userData } = response.data;
       localStorage.setItem('authToken', token);
       setUser(userData);
+      await fetchNotifications(); // Ambil notifikasi setelah login berhasil
       router.push('/'); 
     } catch (error) {
-      console.error("Proses login gagal:", error);
       throw error; 
     } finally {
       setLoading(false);
@@ -64,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     localStorage.removeItem('authToken');
     setUser(null);
+    setNotifications([]); // Kosongkan notifikasi saat logout
     router.push('/auth/login');
   };
 
@@ -73,7 +98,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login, 
     logout, 
     loading,
-    fetchUser // <-- Ekspos fungsi ini ke context
+    fetchUser,
+    notifications, // <-- Ekspos state notifikasi
+    fetchNotifications, // <-- Ekspos fungsi fetch notifikasi
   };
 
   return (

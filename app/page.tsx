@@ -12,12 +12,11 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { getEvents, Event } from "@/lib/apihelper";
 import Image from 'next/image';
 import { Loader2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
-// --- Data untuk Filter (bisa dipindahkan ke file lain jika perlu) ---
 const categories = ["All", "Technology", "Music", "Business", "Sports", "Education", "Arts"];
 const locations = ["All", "Jakarta", "Bandung", "Surabaya", "Yogyakarta", "Bali"];
 
-// --- Komponen untuk Card Event ---
 function EventCard({ event }: { event: Event }) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("id-ID", {
@@ -33,7 +32,7 @@ function EventCard({ event }: { event: Event }) {
         <CardHeader className="p-0">
           <div className="relative h-40 w-full overflow-hidden rounded-t-lg">
             <Image
-              src={event.imageUrl || '/placeholder.jpg'} // Sediakan gambar placeholder
+              src={event.imageUrl || `https://picsum.photos/seed/${event.id}/400/300`}
               alt={event.name}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -56,14 +55,13 @@ function EventCard({ event }: { event: Event }) {
           </div>
         </CardContent>
         <CardFooter className="p-4 pt-0">
-            <Button className="w-full" size="sm">View Details</Button>
+            <Button className="w-full" size="sm">Lihat Detail</Button>
         </CardFooter>
       </Card>
     </Link>
   );
 }
 
-// --- Komponen Utama Halaman Home ---
 export default function HomePage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +70,8 @@ export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedLocation, setSelectedLocation] = useState("All");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
@@ -79,16 +79,17 @@ export default function HomePage() {
     const fetchEvents = async () => {
       setLoading(true);
       setError(null);
-      const params: { search?: string; category?: string; location?: string } = {};
+      const params: { [key: string]: string } = {};
       if (debouncedSearchTerm) params.search = debouncedSearchTerm;
       if (selectedCategory !== "All") params.category = selectedCategory;
       if (selectedLocation !== "All") params.location = selectedLocation;
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
 
       try {
         const response = await getEvents(params);
         setEvents(response.data); 
       } catch (err) {
-        console.error("Gagal mengambil data event:", err);
         setError("Tidak dapat memuat event saat ini. Coba lagi nanti.");
       } finally {
         setLoading(false);
@@ -96,16 +97,15 @@ export default function HomePage() {
     };
 
     fetchEvents();
-  }, [debouncedSearchTerm, selectedCategory, selectedLocation]);
+  }, [debouncedSearchTerm, selectedCategory, selectedLocation, startDate, endDate]);
 
   return (
     <div className="bg-background">
-      {/* Hero & Filters */}
       <section className="bg-gradient-to-b from-slate-900 to-slate-800 text-white pt-12 pb-8 md:pt-20 md:pb-12">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold mb-4 md:mb-6">Discover Amazing Events</h1>
-          <div className="max-w-2xl mx-auto">
-            <div className="relative">
+          <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold mb-4 md:mb-6">Temukan Event Menarik</h1>
+          <div className="max-w-4xl mx-auto">
+            <div className="relative mb-4">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
               <Input
                 type="text"
@@ -115,29 +115,32 @@ export default function HomePage() {
                 className="pl-12 py-4 md:py-6 text-base md:text-lg bg-white/90 text-black"
               />
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 w-full justify-center mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full sm:w-[180px] bg-white/90 text-black"><SelectValue placeholder="Kategori" /></SelectTrigger>
+                <SelectTrigger className="w-full bg-white/90 text-black"><SelectValue placeholder="Kategori" /></SelectTrigger>
                 <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>{category}</SelectItem>
-                  ))}
+                  {categories.map((category) => <SelectItem key={category} value={category}>{category}</SelectItem>)}
                 </SelectContent>
               </Select>
               <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                <SelectTrigger className="w-full sm:w-[180px] bg-white/90 text-black"><SelectValue placeholder="Lokasi" /></SelectTrigger>
+                <SelectTrigger className="w-full bg-white/90 text-black"><SelectValue placeholder="Lokasi" /></SelectTrigger>
                 <SelectContent>
-                  {locations.map((location) => (
-                    <SelectItem key={location} value={location}>{location}</SelectItem>
-                  ))}
+                  {locations.map((location) => <SelectItem key={location} value={location}>{location}</SelectItem>)}
                 </SelectContent>
               </Select>
+              <div className="w-full text-left">
+                  <Label htmlFor="startDate" className="text-xs ml-1">Dari Tanggal</Label>
+                  <Input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="bg-white/90 text-black"/>
+              </div>
+               <div className="w-full text-left">
+                  <Label htmlFor="endDate" className="text-xs ml-1">Sampai Tanggal</Label>
+                  <Input id="endDate" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="bg-white/90 text-black" min={startDate}/>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Events Grid */}
       <section className="py-8 md:py-12">
         <div className="container mx-auto px-4">
           {loading ? (
@@ -153,9 +156,7 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-              {events.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
+              {events.map((event) => <EventCard key={event.id} event={event} />)}
             </div>
           )}
         </div>
