@@ -25,7 +25,7 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 export default function ProfileInfoTab({ user }: { user: UserProfile }) {
   const [loading, setLoading] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
-  // Ambil fungsi fetchUser dari context
+  // Ambil fungsi fetchUser dari context untuk me-refresh data
   const { fetchUser } = useAuth(); 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -72,7 +72,7 @@ export default function ProfileInfoTab({ user }: { user: UserProfile }) {
       await updateMyAvatar(formData);
       
       // ## INI BAGIAN PERBAIKANNYA ##
-      // Panggil fetchUser di sini setelah upload berhasil untuk refresh data
+      // Panggil fetchUser() setelah upload berhasil untuk me-refresh data pengguna di seluruh aplikasi.
       await fetchUser(); 
       toast.success("Foto profil berhasil diunggah!");
 
