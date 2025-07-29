@@ -22,7 +22,7 @@ export interface UserProfile {
 
 interface LoginResponse {
   token: string;
-  user: UserProfile;
+  user: UserProfile; 
 }
 
 export interface Event {
@@ -39,26 +39,6 @@ export interface Event {
   ticketTotal: number;
   ticketSold: number;
   imageUrl?: string | null;
-}
-
-// Tipe untuk data ulasan
-export interface Review {
-  id: string;
-  rating: number;
-  comment: string | null;
-  imageUrl: string | null; // <-- [PERBAIKAN] Tambahkan properti ini
-  createdAt: string;
-  user: {
-    name: string;
-    profile: {
-      avatarUrl: string | null;
-    } | null;
-  };
-}
-
-// Tipe Event yang menyertakan data ulasan
-export interface EventWithReviews extends Event {
-  reviews: Review[];
 }
 
 export interface Voucher {
@@ -85,10 +65,9 @@ export interface Transaction {
     name: string;
     slug: string;
     startDate: string;
-    endDate: string;
     location?: string;
   };
-  user: {
+  user: { 
       name: string;
       email: string;
   }
@@ -131,7 +110,7 @@ export interface Notification {
 
 // --- Konfigurasi Instance Axios ---
 const api = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api/v1`,
+  baseURL: 'http://localhost:8000/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -177,7 +156,7 @@ export const resetPassword = (data: { token: string; newPassword: string }) => a
 
 // User Profile
 export const getMyProfile = () => api.get<UserProfile>('/users/me');
-export const updateMyProfile = (data: { name?: string; bio?: string; phone?: string }) =>
+export const updateMyProfile = (data: { name?: string; bio?: string; phone?: string }) => 
   api.put<{ message: string, data: UserProfile }>('/users/me', data);
 export const changePassword = (data: any) => api.put<SimpleMessageResponse>('/users/me/change-password', data);
 export const updateMyAvatar = (avatarData: FormData) => {
@@ -190,19 +169,16 @@ export const updateMyAvatar = (avatarData: FormData) => {
 
 // Events
 export const getEvents = (params?: any) => api.get<Event[]>('/events', { params });
-export const getEventBySlug = (slug: string) => api.get<EventWithReviews>(`/events/${slug}`);
-export const getEventById = (id: string) => api.get<Event>(`/events/id/${id}`);
+export const getEventBySlug = (slug: string) => api.get<Event>(`/events/${slug}`);
 export const getMyOrganizerEvents = () => api.get<Event[]>('/events/organizer/my-events');
-export const createEvent = (data: FormData) => api.post('/events', data, {
+export const createEvent = (data: FormData) => {
+  return api.post('/events', data, {
     headers: {
-        'Content-Type': 'multipart/form-data',
+      'Content-Type': 'multipart/form-data',
     },
-});
-export const updateEvent = (eventId: string, data: FormData) => api.put(`/events/${eventId}`, data, {
-    headers: {
-        'Content-Type': 'multipart/form-data',
-    },
-});
+  });
+};
+export const updateEvent = (eventId: string, data: any) => api.put(`/events/${eventId}`, data);
 export const deleteEvent = (eventId: string) => api.delete(`/events/${eventId}`);
 
 // Vouchers
@@ -215,11 +191,14 @@ export const createTransaction = (data: { eventId: string; quantity: number; vou
 export const getTransactionById = (transactionId: string) => api.get<Transaction>(`/transactions/${transactionId}`);
 
 // Reviews
-export const createReview = (data: FormData) => api.post('/reviews', data, {
-  headers: {
-    'Content-Type': 'multipart/form-data',
-  },
-});
+export const createReview = (data: FormData) => {
+    return api.post('/reviews', data, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+};
+export const getEventReviews = (eventId: string) => api.get(`/reviews/${eventId}`);
 
 // Notifications
 export const getMyNotifications = () => api.get<Notification[]>('/notifications/me');
@@ -232,7 +211,12 @@ export const rejectTransaction = (transactionId: string) => api.post(`/transacti
 export const getEventAttendees = (eventId: string) => api.get<Attendee[]>(`/events/${eventId}/attendees`);
 
 // Dashboard
-export const getOrganizerDashboard = () => api.get<OrganizerDashboardData>('/dashboard');
+// [PERBAIKAN] Tambahkan parameter month dan year untuk filter
+export const getOrganizerDashboard = (month: number, year: number) => {
+  return api.get<OrganizerDashboardData>('/dashboard', {
+    params: { month, year }
+  });
+};
 
 // File Upload
 export const uploadPaymentProof = (transactionId: string, proofData: FormData) => {
