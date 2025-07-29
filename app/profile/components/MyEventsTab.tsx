@@ -31,12 +31,12 @@ export default function MyEventsTab() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <CardTitle>Tiket Event Saya</CardTitle>
             <CardDescription>Ini adalah daftar e-tiket yang telah berhasil Anda dapatkan.</CardDescription>
           </div>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="w-full sm:w-auto">
             <Link href="/profile/transactions"><History className="mr-2 h-4 w-4"/> Lihat Semua Transaksi</Link>
           </Button>
         </div>
@@ -44,9 +44,6 @@ export default function MyEventsTab() {
       <CardContent className="space-y-4">
         {transactions.length > 0 ? (
           transactions.map((trx) => {
-            // Cek apakah event sudah selesai
-            const isEventFinished = new Date(trx.event.endDate) < new Date();
-
             return (
               <div key={trx.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg gap-4">
                 <div>
@@ -55,16 +52,14 @@ export default function MyEventsTab() {
                     {new Date(trx.event.startDate).toLocaleDateString("id-ID", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                  {/* Tombol ulasan hanya muncul jika event sudah selesai */}
-                  {isEventFinished && (
-                    <Button asChild variant="secondary" className="w-full sm:w-auto">
-                      <Link href={`/events/${trx.event.slug}`}>
-                        <MessageSquare className="mr-2 h-4 w-4"/>
-                        Beri Ulasan
-                      </Link>
-                    </Button>
-                  )}
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
+                  {/* [PERUBAHAN] Tombol ulasan sekarang selalu muncul setelah transaksi selesai */}
+                  <Button asChild variant="secondary" className="w-full sm:w-auto">
+                    <Link href={`/events/${trx.event.slug}`}>
+                      <MessageSquare className="mr-2 h-4 w-4"/>
+                      Beri Ulasan
+                    </Link>
+                  </Button>
                   <Button asChild className="w-full sm:w-auto">
                     <Link href={`/profile/transactions/${trx.id}`}>
                       <Ticket className="mr-2 h-4 w-4"/>
