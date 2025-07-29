@@ -16,7 +16,6 @@ import SecurityTab from './components/SecurityTab';
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
 
-  // Tampilkan loading state sementara context memeriksa sesi login
   if (authLoading) {
       return (
         <div className="flex flex-col justify-center items-center min-h-screen">
@@ -26,7 +25,6 @@ export default function ProfilePage() {
       );
   }
   
-  // Jika tidak ada user setelah loading selesai, minta untuk login
   if (!user) {
       return (
         <div className="flex flex-col justify-center items-center min-h-screen gap-4">
@@ -38,7 +36,6 @@ export default function ProfilePage() {
       );
   }
 
-  // Tampilan utama jika user sudah ada
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-6 flex justify-between items-center">
@@ -56,7 +53,7 @@ export default function ProfilePage() {
           <TabsTrigger value="profile">Profil</TabsTrigger>
           <TabsTrigger value="points">Poin</TabsTrigger>
           <TabsTrigger value="coupons">Kupon</TabsTrigger>
-          <TabsTrigger value="my-events">Event Saya</TabsTrigger>
+          <TabsTrigger value="my-events">Tiket Saya</TabsTrigger>
           <TabsTrigger value="security">Keamanan</TabsTrigger>
         </TabsList>
 

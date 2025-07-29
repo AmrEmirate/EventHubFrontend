@@ -79,87 +79,93 @@ export default function EventDetailPage() {
 
   return (
     <div className="bg-muted/20 pb-12">
-      {/* Gambar Banner */}
-      <div className="relative h-64 md:h-96 w-full bg-slate-200">
-        <Image
-            src={event.imageUrl ? `${API_BASE_URL}${event.imageUrl}` : '/placeholder.jpg'}
-            alt={event.name}
-            fill
-            className="object-cover"
-            priority
-        />
-      </div>
+      {/* [PERBAIKAN] Wrapper untuk Banner dan Konten */}
+      <div className="relative">
+        {/* Gambar Banner */}
+        <div className="relative h-64 md:h-96 w-full bg-slate-200">
+          <Image
+              src={event.imageUrl ? `${API_BASE_URL}${event.imageUrl}` : 'https://placehold.co/1200x400/e2e8f0/64748b?text=Event+Image'}
+              alt={event.name}
+              fill
+              className="object-cover"
+              priority
+          />
+          {/* Overlay gelap agar teks lebih terbaca jika ada di atas gambar */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+        </div>
 
-      <div className="container mx-auto px-4 -mt-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Konten Utama (Deskripsi, dll) */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <Badge variant="outline" className="w-fit">{event.category}</Badge>
-                <CardTitle className="text-3xl md:text-4xl !mt-4">{event.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div className="flex items-center text-muted-foreground">
-                    <Calendar className="h-5 w-5 mr-3 text-primary" />
-                    <div>
-                      <p className="font-medium">Tanggal & Waktu</p>
-                      <p className="text-sm">{formatDate(event.startDate)}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center text-muted-foreground">
-                    <MapPin className="h-5 w-5 mr-3 text-primary" />
-                    <div>
-                      <p className="font-medium">Lokasi</p>
-                      <p className="text-sm">{event.location}</p>
-                    </div>
-                  </div>
-                </div>
-                <Separator />
-                <div className="prose max-w-none mt-6">
-                  <h3 className="font-semibold">Deskripsi Event</h3>
-                  <p>{event.description}</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Bagian Ulasan/Review */}
-            <Card>
+        {/* [PERBAIKAN] Konten yang menimpa banner */}
+        <div className="container mx-auto px-4 relative -mt-16 md:-mt-24">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* Konten Utama (Deskripsi, dll) */}
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
                 <CardHeader>
-                    <CardTitle>Ulasan Event</CardTitle>
+                  <Badge variant="secondary" className="w-fit">{event.category}</Badge>
+                  <CardTitle className="text-3xl md:text-4xl !mt-4">{event.name}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-muted-foreground mb-4">Bagikan pengalaman Anda di event ini!</p>
-                    <ReviewForm eventId={event.id} onReviewSubmit={fetchEventDetail} />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div className="flex items-center text-muted-foreground">
+                      <Calendar className="h-5 w-5 mr-3 text-primary" />
+                      <div>
+                        <p className="font-medium">Tanggal & Waktu</p>
+                        <p className="text-sm">{formatDate(event.startDate)}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center text-muted-foreground">
+                      <MapPin className="h-5 w-5 mr-3 text-primary" />
+                      <div>
+                        <p className="font-medium">Lokasi</p>
+                        <p className="text-sm">{event.location}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <Separator />
+                  <div className="prose max-w-none mt-6">
+                    <h3 className="font-semibold">Deskripsi Event</h3>
+                    <p>{event.description}</p>
+                  </div>
                 </CardContent>
-            </Card>
-          </div>
+              </Card>
 
-          {/* Sidebar Pembelian Tiket */}
-          <div className="space-y-6">
-            <Card className="sticky top-24">
-              <CardHeader>
-                <CardTitle>Dapatkan Tiket Anda</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-2xl font-bold">
-                  <span>{formatPrice(event.price)}</span>
-                </div>
-                <Separator/>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Users className="h-4 w-4 mr-2" />
-                  <span>Sisa tiket: {event.ticketTotal - event.ticketSold}</span>
-                </div>
-                <Link href={`/checkout/${event.slug}`} className="w-full block">
-                  <Button className="w-full" size="lg" disabled={event.ticketTotal - event.ticketSold <= 0}>
-                    <Ticket className="mr-2 h-4 w-4" />
-                    {event.ticketTotal - event.ticketSold > 0 ? 'Beli Tiket' : 'Tiket Habis'}
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+              {/* Bagian Ulasan/Review */}
+              <Card>
+                  <CardHeader>
+                      <CardTitle>Ulasan Event</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                      <p className="text-muted-foreground mb-4">Bagikan pengalaman Anda di event ini!</p>
+                      <ReviewForm eventId={event.id} onReviewSubmit={fetchEventDetail} />
+                  </CardContent>
+              </Card>
+            </div>
+
+            {/* Sidebar Pembelian Tiket */}
+            <div className="space-y-6">
+              <Card className="sticky top-24">
+                <CardHeader>
+                  <CardTitle>Dapatkan Tiket Anda</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-2xl font-bold">
+                    <span>{formatPrice(event.price)}</span>
+                  </div>
+                  <Separator/>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Users className="h-4 w-4 mr-2" />
+                    <span>Sisa tiket: {event.ticketTotal - event.ticketSold}</span>
+                  </div>
+                  <Link href={`/checkout/${event.slug}`} className="w-full block">
+                    <Button className="w-full" size="lg" disabled={event.ticketTotal - event.ticketSold <= 0}>
+                      <Ticket className="mr-2 h-4 w-4" />
+                      {event.ticketTotal - event.ticketSold > 0 ? 'Beli Tiket' : 'Tiket Habis'}
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>

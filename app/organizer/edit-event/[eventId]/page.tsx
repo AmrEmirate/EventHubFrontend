@@ -1,11 +1,9 @@
-// frontend/app/organizer/edit-event/[eventId]/page.tsx
-
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, DollarSign, Ticket, Loader2 } from "lucide-react";
+import { ArrowLeft, DollarSign, Ticket, Loader2, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { getEventBySlug, updateEvent } from "../../../../lib/apihelper"; // Impor helper
+// [PERBAIKAN] Impor `getEventById` dan `updateEvent`
+import { getEventById, updateEvent } from "../../../../lib/apihelper"; 
 
 const categories = ["Technology", "Music", "Business", "Sports", "Education", "Arts", "Health"];
 
@@ -30,25 +29,25 @@ export default function EditEventPage() {
     ticketTotal: 100,
   });
   
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const params = useParams();
   const { eventId } = params;
 
-  // 1. Ambil data event yang ada untuk diisi ke formulir
   useEffect(() => {
-    // Backend menggunakan ID untuk update, tetapi kita bisa pakai slug untuk mengambil data awalnya
-    // Asumsi `eventId` dari URL adalah `slug` event
     if (typeof eventId !== "string") return;
 
     const fetchEventData = async () => {
       setLoading(true);
       try {
-        const response = await getEventBySlug(eventId as string); 
+        // [PERBAIKAN] Gunakan getEventById
+        const response = await getEventById(eventId as string); 
         const event = response.data;
 
-        // Fungsi untuk format tanggal ke YYYY-MM-DDTHH:mm
         const toDateTimeLocal = (dateString: string) => {
             if (!dateString) return "";
             const date = new Date(dateString);
@@ -67,6 +66,7 @@ export default function EditEventPage() {
           isFree: event.isFree,
           ticketTotal: event.ticketTotal,
         });
+        setExistingImageUrl(event.imageUrl || null);
       } catch (err) {
         setError("Gagal memuat data event.");
         console.error(err);
@@ -79,42 +79,46 @@ export default function EditEventPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    const isCheckbox = type === 'checkbox';
-    // @ts-ignore
-    const val = isCheckbox ? e.target.checked : value;
-    
-    setFormData(prev => ({ ...prev, [name]: val }));
-    if (name === 'isFree' && val === true) {
-      setFormData(prev => ({ ...prev, price: 0, isFree: true }));
+    if (type === 'checkbox') {
+      const isChecked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({ ...prev, isFree: isChecked, price: isChecked ? 0 : prev.price }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({...prev, [name]: value}));
   };
+  
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
+  };
 
-  // 2. Fungsi untuk mengirim data yang sudah diupdate
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (typeof eventId !== "string") return;
-    setLoading(true);
+    setIsSubmitting(true);
     setError(null);
     try {
-      const dataToSend = {
-        ...formData,
-        price: Number(formData.price),
-        ticketTotal: Number(formData.ticketTotal),
-      };
+      const data = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+          data.append(key, String(value));
+      });
+      if (imageFile) {
+        data.append('imageUrl', imageFile);
+      }
       
-      // Menggunakan `eventId` sebagai ID untuk update
-      await updateEvent(eventId, dataToSend); 
+      await updateEvent(eventId, data);
       alert("Event berhasil diperbarui!");
       router.push("/organizer/dashboard");
     } catch (err: any) {
       console.error("Gagal memperbarui event:", err);
       setError(err.response?.data?.message || "Terjadi kesalahan saat memperbarui event.");
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -137,7 +141,8 @@ export default function EditEventPage() {
               <CardDescription>Perbarui detail event Anda di bawah ini.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-2">
+              {/* Form fields... (copy dari file create-event atau sesuaikan) */}
+               <div className="space-y-2">
                 <Label htmlFor="name">Nama Event</Label>
                 <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
               </div>
@@ -145,7 +150,17 @@ export default function EditEventPage() {
                 <Label htmlFor="description">Deskripsi</Label>
                 <Textarea id="description" name="description" value={formData.description} onChange={handleChange} required />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div className="space-y-2">
+                <Label htmlFor="imageUrl">Gambar Event</Label>
+                <div className="relative flex items-center gap-4 rounded-md border border-input p-2">
+                  <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                  <Input id="imageUrl" name="imageUrl" type="file" onChange={handleImageChange} accept="image/png, image/jpeg" className="..."/>
+                </div>
+                 {existingImageUrl && !imageFile && <p className="text-xs text-muted-foreground mt-2">Gambar saat ini: {existingImageUrl.split('/').pop()}</p>}
+              </div>
+
+              {/* ... sisa form lainnya ... */}
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="category">Kategori</Label>
                    <Select name="category" value={formData.category} onValueChange={(value) => handleSelectChange("category", value)} required>
@@ -190,10 +205,11 @@ export default function EditEventPage() {
                     <Input id="ticketTotal" name="ticketTotal" type="number" min="1" value={formData.ticketTotal} onChange={handleChange} required className="pl-8"/>
                   </div>
               </div>
+
               {error && <p className="text-sm text-red-500 text-center bg-red-50 p-3 rounded-md">{error}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {loading ? "Menyimpan Perubahan..." : "Simpan Perubahan"}
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting ? "Menyimpan Perubahan..." : "Simpan Perubahan"}
               </Button>
             </CardContent>
           </Card>

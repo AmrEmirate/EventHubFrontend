@@ -1,3 +1,4 @@
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
@@ -7,6 +8,14 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [
+      // BARIS INI PENTING UNTUK MENAMPILKAN GAMBAR DARI LOKAL
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8000", // Sesuaikan dengan port backend Anda
+        pathname: "/uploads/**",
+      },
+      // Pola lain yang sudah ada
       {
         protocol: "https",
         hostname: "images.unsplash.com",
@@ -26,8 +35,8 @@ const nextConfig = {
         pathname: "/**",
       },
     ],
-    unoptimized: true,
+    // unoptimized: true, // Anda bisa coba hapus baris ini jika masih ada masalah
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

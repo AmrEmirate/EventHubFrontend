@@ -25,7 +25,8 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 export default function ProfileInfoTab({ user }: { user: UserProfile }) {
   const [loading, setLoading] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
-  const { fetchUser } = useAuth();
+  // Ambil fungsi fetchUser dari context
+  const { fetchUser } = useAuth(); 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormData>({
@@ -49,7 +50,7 @@ export default function ProfileInfoTab({ user }: { user: UserProfile }) {
     setLoading(true);
     try {
       await updateMyProfile(data);
-      await fetchUser();
+      await fetchUser(); // Refresh data user setelah update profil
       toast.success("Sukses!", { description: 'Informasi profil Anda telah berhasil diperbarui.' });
     } catch (error) {
       console.error(error);
@@ -69,8 +70,12 @@ export default function ProfileInfoTab({ user }: { user: UserProfile }) {
     setAvatarLoading(true);
     try {
       await updateMyAvatar(formData);
-      await fetchUser();
+      
+      // ## INI BAGIAN PERBAIKANNYA ##
+      // Panggil fetchUser di sini setelah upload berhasil untuk refresh data
+      await fetchUser(); 
       toast.success("Foto profil berhasil diunggah!");
+
     } catch (err: any) {
       toast.error("Gagal Mengunggah", {
         description: err.response?.data?.message || "Ukuran file mungkin terlalu besar (maks 5MB).",
@@ -95,7 +100,6 @@ export default function ProfileInfoTab({ user }: { user: UserProfile }) {
           <CardDescription>Perbarui informasi personal dan kontak Anda.</CardDescription>
         </CardHeader>
         <CardContent>
-          {/* [PERBAIKAN] Tambahkan aria-label di sini */}
           <input
             type="file"
             ref={fileInputRef}

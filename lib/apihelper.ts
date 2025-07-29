@@ -118,7 +118,6 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    // [PERBAIKAN] Cek apakah headers ada sebelum digunakan
     if (!config.headers) {
         config.headers = {};
     }
@@ -171,6 +170,7 @@ export const updateMyAvatar = (avatarData: FormData) => {
 // Events
 export const getEvents = (params?: any) => api.get<Event[]>('/events', { params });
 export const getEventBySlug = (slug: string) => api.get<Event>(`/events/${slug}`);
+export const getEventById = (id: string) => api.get<Event>(`/events/id/${id}`);
 export const getMyOrganizerEvents = () => api.get<Event[]>('/events/organizer/my-events');
 export const createEvent = (data: FormData) => api.post('/events', data, {
     headers: {
