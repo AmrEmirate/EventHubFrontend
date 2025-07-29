@@ -20,6 +20,7 @@ export default function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { slug } = params;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
 
   const fetchEventDetail = async () => {
     if (typeof slug !== 'string') {
@@ -81,7 +82,7 @@ export default function EventDetailPage() {
       {/* Gambar Banner */}
       <div className="relative h-64 md:h-96 w-full bg-slate-200">
         <Image
-            src={event.imageUrl || '/placeholder.jpg'} // Gunakan gambar placeholder jika tidak ada
+            src={event.imageUrl ? `${API_BASE_URL}${event.imageUrl}` : '/placeholder.jpg'}
             alt={event.name}
             fill
             className="object-cover"
@@ -130,7 +131,6 @@ export default function EventDetailPage() {
                     <CardTitle>Ulasan Event</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {/* Logika untuk menampilkan ulasan yang sudah ada bisa ditambahkan di sini */}
                     <p className="text-muted-foreground mb-4">Bagikan pengalaman Anda di event ini!</p>
                     <ReviewForm eventId={event.id} onReviewSubmit={fetchEventDetail} />
                 </CardContent>

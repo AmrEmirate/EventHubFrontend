@@ -25,6 +25,8 @@ function EventCard({ event }: { event: Event }) {
       year: "numeric",
     });
   };
+  
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
 
   return (
     <Link href={`/events/${event.slug}`} className="block group">
@@ -32,7 +34,7 @@ function EventCard({ event }: { event: Event }) {
         <CardHeader className="p-0">
           <div className="relative h-40 w-full overflow-hidden rounded-t-lg">
             <Image
-              src={event.imageUrl || `https://picsum.photos/seed/${event.id}/400/300`}
+              src={event.imageUrl ? `${API_BASE_URL}${event.imageUrl}` : `https://picsum.photos/seed/${event.id}/400/300`}
               alt={event.name}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

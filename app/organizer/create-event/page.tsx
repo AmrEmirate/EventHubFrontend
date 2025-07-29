@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, DollarSign, Ticket, Loader2 } from "lucide-react";
+import { ArrowLeft, DollarSign, Ticket, Loader2, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { createEvent } from "../../../lib/apihelper"; // Impor fungsi API
+import { createEvent } from "../../../lib/apihelper"; 
 
 // Daftar kategori yang bisa dipilih
 const categories = ["Technology", "Music", "Business", "Sports", "Education", "Arts", "Health"];
@@ -29,6 +29,7 @@ export default function CreateEventPage() {
     ticketTotal: 100,
   });
   
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -54,6 +55,14 @@ export default function CreateEventPage() {
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({...prev, [name]: value}));
   };
+  
+  // Handler baru untuk input file gambar
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
+  };
+
 
   // Fungsi untuk mengirim data ke backend
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,20 +71,25 @@ export default function CreateEventPage() {
     setError(null);
     
     try {
-      // Pastikan tipe data number dikirim sebagai angka
-      const dataToSend = {
-        ...formData,
-        price: Number(formData.price),
-        ticketTotal: Number(formData.ticketTotal),
-      };
+      // Menggunakan FormData untuk mengirim data termasuk file
+      const data = new FormData();
+      
+      // Append semua data dari state formData ke FormData object
+      Object.entries(formData).forEach(([key, value]) => {
+          data.append(key, String(value));
+      });
+      
+      // Append file gambar jika ada
+      if (imageFile) {
+        data.append('imageUrl', imageFile); // Nama field 'imageUrl' harus cocok dengan di backend
+      }
 
-      await createEvent(dataToSend);
+      await createEvent(data);
       alert("Event berhasil dibuat!");
       router.push("/organizer/dashboard");
 
     } catch (err: any) {
       console.error("Gagal membuat event:", err);
-      // Menampilkan pesan error dari backend jika ada
       const errorMessage = err.response?.data?.errors 
         ? Object.values(err.response.data.errors).flat().join(', ')
         : (err.response?.data?.message || "Terjadi kesalahan saat membuat event.");
@@ -109,6 +123,23 @@ export default function CreateEventPage() {
               <div className="space-y-2">
                 <Label htmlFor="description">Deskripsi</Label>
                 <Textarea id="description" name="description" value={formData.description} onChange={handleChange} placeholder="Jelaskan tentang event Anda..." required />
+              </div>
+
+              {/* Input untuk gambar event */}
+              <div className="space-y-2">
+                <Label htmlFor="imageUrl">Gambar Event</Label>
+                <div className="relative flex items-center gap-4 rounded-md border border-input p-2">
+                  <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                  <Input 
+                    id="imageUrl" 
+                    name="imageUrl" 
+                    type="file" 
+                    onChange={handleImageChange} 
+                    accept="image/png, image/jpeg" 
+                    className="border-0 shadow-none p-0 h-auto file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                  />
+                </div>
+                 <p className="text-xs text-muted-foreground mt-2">Pilih gambar utama untuk event Anda (JPG atau PNG, maks 5MB).</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -22,7 +22,7 @@ export interface UserProfile {
 
 interface LoginResponse {
   token: string;
-  user: UserProfile; 
+  user: UserProfile;
 }
 
 export interface Event {
@@ -67,7 +67,7 @@ export interface Transaction {
     startDate: string;
     location?: string;
   };
-  user: { 
+  user: {
       name: string;
       email: string;
   }
@@ -110,7 +110,7 @@ export interface Notification {
 
 // --- Konfigurasi Instance Axios ---
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
+  baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api/v1`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -118,6 +118,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
+    // [PERBAIKAN] Cek apakah headers ada sebelum digunakan
     if (!config.headers) {
         config.headers = {};
     }
@@ -156,7 +157,7 @@ export const resetPassword = (data: { token: string; newPassword: string }) => a
 
 // User Profile
 export const getMyProfile = () => api.get<UserProfile>('/users/me');
-export const updateMyProfile = (data: { name?: string; bio?: string; phone?: string }) => 
+export const updateMyProfile = (data: { name?: string; bio?: string; phone?: string }) =>
   api.put<{ message: string, data: UserProfile }>('/users/me', data);
 export const changePassword = (data: any) => api.put<SimpleMessageResponse>('/users/me/change-password', data);
 export const updateMyAvatar = (avatarData: FormData) => {
@@ -171,8 +172,16 @@ export const updateMyAvatar = (avatarData: FormData) => {
 export const getEvents = (params?: any) => api.get<Event[]>('/events', { params });
 export const getEventBySlug = (slug: string) => api.get<Event>(`/events/${slug}`);
 export const getMyOrganizerEvents = () => api.get<Event[]>('/events/organizer/my-events');
-export const createEvent = (data: any) => api.post('/events', data);
-export const updateEvent = (eventId: string, data: any) => api.put(`/events/${eventId}`, data);
+export const createEvent = (data: FormData) => api.post('/events', data, {
+    headers: {
+        'Content-Type': 'multipart/form-data',
+    },
+});
+export const updateEvent = (eventId: string, data: FormData) => api.put(`/events/${eventId}`, data, {
+    headers: {
+        'Content-Type': 'multipart/form-data',
+    },
+});
 export const deleteEvent = (eventId: string) => api.delete(`/events/${eventId}`);
 
 // Vouchers
