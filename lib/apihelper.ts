@@ -46,6 +46,7 @@ export interface Review {
   id: string;
   rating: number;
   comment: string | null;
+  imageUrl: string | null; // <-- [PERBAIKAN] Tambahkan properti ini
   createdAt: string;
   user: {
     name: string;
@@ -84,7 +85,7 @@ export interface Transaction {
     name: string;
     slug: string;
     startDate: string;
-    endDate: string; // Pastikan endDate ada di sini
+    endDate: string;
     location?: string;
   };
   user: {
@@ -214,7 +215,11 @@ export const createTransaction = (data: { eventId: string; quantity: number; vou
 export const getTransactionById = (transactionId: string) => api.get<Transaction>(`/transactions/${transactionId}`);
 
 // Reviews
-export const createReview = (data: { eventId: string; rating: number; comment?: string }) => api.post('/reviews', data);
+export const createReview = (data: FormData) => api.post('/reviews', data, {
+  headers: {
+    'Content-Type': 'multipart/form-data',
+  },
+});
 
 // Notifications
 export const getMyNotifications = () => api.get<Notification[]>('/notifications/me');

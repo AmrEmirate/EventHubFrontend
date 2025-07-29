@@ -10,28 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getEventBySlug, getMyTransactions, Event, Transaction } from "@/lib/apihelper";
+import { getEventBySlug, getMyTransactions, EventWithReviews, Transaction } from "@/lib/apihelper";
 import { ReviewForm } from "@/components/reviews/review-form";
 import { useAuth } from "@/context/AuthContext";
-
-// Definisikan tipe Review secara eksplisit
-interface Review {
-  id: string;
-  rating: number;
-  comment: string | null;
-  createdAt: string;
-  user: {
-    name: string;
-    profile: {
-      avatarUrl: string | null;
-    } | null;
-  };
-}
-
-// Tambahkan properti reviews ke tipe Event
-interface EventWithReviews extends Event {
-  reviews: Review[];
-}
 
 export default function EventDetailPage() {
   const [event, setEvent] = useState<EventWithReviews | null>(null);
@@ -74,13 +55,10 @@ export default function EventDetailPage() {
     fetchData();
   }, [slug, isAuthenticated]);
 
-  // Logika untuk mengecek apakah user bisa memberi ulasan
   const canReview = isAuthenticated && 
                     event &&
-                    userTransactions.some(trx => trx.event.id === event.id && trx.status === 'COMPLETED') &&
-                    new Date(event.endDate) < new Date();
+                    userTransactions.some(trx => trx.event.id === event.id && trx.status === 'COMPLETED');
 
-  // Logika untuk mengecek apakah user sudah pernah memberi ulasan
   const hasReviewed = event?.reviews.some(review => review.user.name === user?.name);
 
   const formatPrice = (price: number) => {
@@ -168,21 +146,35 @@ export default function EventDetailPage() {
                     )}
                     
                     {event.reviews && event.reviews.length > 0 ? (
-                      <div className="space-y-4">
+                      <div className="space-y-6">
                         {event.reviews.map(review => (
-                          <div key={review.id} className="flex items-start gap-4">
+                          <div key={review.id} className="flex items-start gap-4 border-b pb-4 last:border-b-0 last:pb-0">
                             <Avatar>
                               <AvatarImage src={review.user.profile?.avatarUrl ? `${API_BASE_URL}${review.user.profile.avatarUrl}` : undefined} />
                               <AvatarFallback>{review.user.name.charAt(0)}</AvatarFallback>
                             </Avatar>
-                            <div>
+                            <div className="w-full">
                               <p className="font-semibold">{review.user.name}</p>
                               <div className="flex items-center gap-1">
                                 {[...Array(5)].map((_, i) => (
                                   <Star key={i} className={`h-4 w-4 ${i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} />
                                 ))}
                               </div>
-                              <p className="text-sm text-muted-foreground mt-1">{review.comment}</p>
+                              
+                              {/* [PERBAIKAN] Ubah ukuran gambar di sini */}
+                              {review.imageUrl && (
+                                <div className="mt-3 relative w-full md:w-1/2 h-48 rounded-lg overflow-hidden">
+                                  <Image
+                                    src={`${API_BASE_URL}${review.imageUrl}`}
+                                    alt={`Ulasan dari ${review.user.name}`}
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, 500px"
+                                  />
+                                </div>
+                              )}
+
+                              <p className="text-sm text-muted-foreground mt-2">{review.comment}</p>
                             </div>
                           </div>
                         ))}
