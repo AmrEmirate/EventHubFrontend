@@ -41,6 +41,25 @@ export interface Event {
   imageUrl?: string | null;
 }
 
+// Tipe untuk data ulasan
+export interface Review {
+  id: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+  user: {
+    name: string;
+    profile: {
+      avatarUrl: string | null;
+    } | null;
+  };
+}
+
+// Tipe Event yang menyertakan data ulasan
+export interface EventWithReviews extends Event {
+  reviews: Review[];
+}
+
 export interface Voucher {
   id: string;
   code: string;
@@ -65,6 +84,7 @@ export interface Transaction {
     name: string;
     slug: string;
     startDate: string;
+    endDate: string; // Pastikan endDate ada di sini
     location?: string;
   };
   user: {
@@ -169,7 +189,7 @@ export const updateMyAvatar = (avatarData: FormData) => {
 
 // Events
 export const getEvents = (params?: any) => api.get<Event[]>('/events', { params });
-export const getEventBySlug = (slug: string) => api.get<Event>(`/events/${slug}`);
+export const getEventBySlug = (slug: string) => api.get<EventWithReviews>(`/events/${slug}`);
 export const getEventById = (id: string) => api.get<Event>(`/events/id/${id}`);
 export const getMyOrganizerEvents = () => api.get<Event[]>('/events/organizer/my-events');
 export const createEvent = (data: FormData) => api.post('/events', data, {

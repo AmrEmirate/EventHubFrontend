@@ -4,7 +4,7 @@ import { getMyTransactions, Transaction } from "@/lib/apihelper";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Loader2, Ticket, History } from "lucide-react";
+import { Loader2, Ticket, History, MessageSquare } from "lucide-react";
 
 export default function MyEventsTab() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -43,19 +43,38 @@ export default function MyEventsTab() {
       </CardHeader>
       <CardContent className="space-y-4">
         {transactions.length > 0 ? (
-          transactions.map((trx) => (
-            <div key={trx.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg gap-4">
-              <div>
-                <p className="font-semibold text-lg">{trx.event.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(trx.event.startDate).toLocaleDateString("id-ID", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                </p>
+          transactions.map((trx) => {
+            // Cek apakah event sudah selesai
+            const isEventFinished = new Date(trx.event.endDate) < new Date();
+
+            return (
+              <div key={trx.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg gap-4">
+                <div>
+                  <p className="font-semibold text-lg">{trx.event.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(trx.event.startDate).toLocaleDateString("id-ID", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  {/* Tombol ulasan hanya muncul jika event sudah selesai */}
+                  {isEventFinished && (
+                    <Button asChild variant="secondary" className="w-full sm:w-auto">
+                      <Link href={`/events/${trx.event.slug}`}>
+                        <MessageSquare className="mr-2 h-4 w-4"/>
+                        Beri Ulasan
+                      </Link>
+                    </Button>
+                  )}
+                  <Button asChild className="w-full sm:w-auto">
+                    <Link href={`/profile/transactions/${trx.id}`}>
+                      <Ticket className="mr-2 h-4 w-4"/>
+                      Lihat E-Tiket
+                    </Link>
+                  </Button>
+                </div>
               </div>
-              <Button asChild className="w-full sm:w-auto">
-                <Link href={`/profile/transactions/${trx.id}`}><Ticket className="mr-2 h-4 w-4"/>Lihat E-Tiket</Link>
-              </Button>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div className="text-center text-muted-foreground py-10">
             <Ticket className="mx-auto h-12 w-12 text-gray-400" />

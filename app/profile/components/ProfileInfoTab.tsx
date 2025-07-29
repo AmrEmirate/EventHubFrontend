@@ -25,7 +25,6 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 export default function ProfileInfoTab({ user }: { user: UserProfile }) {
   const [loading, setLoading] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
-  // Ambil fungsi fetchUser dari context untuk me-refresh data
   const { fetchUser } = useAuth(); 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -50,10 +49,9 @@ export default function ProfileInfoTab({ user }: { user: UserProfile }) {
     setLoading(true);
     try {
       await updateMyProfile(data);
-      await fetchUser(); // Refresh data user setelah update profil
+      await fetchUser();
       toast.success("Sukses!", { description: 'Informasi profil Anda telah berhasil diperbarui.' });
     } catch (error) {
-      console.error(error);
       toast.error("Gagal", { description: 'Tidak dapat memperbarui profil.' });
     } finally {
       setLoading(false);
@@ -70,12 +68,8 @@ export default function ProfileInfoTab({ user }: { user: UserProfile }) {
     setAvatarLoading(true);
     try {
       await updateMyAvatar(formData);
-      
-      // ## INI BAGIAN PERBAIKANNYA ##
-      // Panggil fetchUser() setelah upload berhasil untuk me-refresh data pengguna di seluruh aplikasi.
       await fetchUser(); 
       toast.success("Foto profil berhasil diunggah!");
-
     } catch (err: any) {
       toast.error("Gagal Mengunggah", {
         description: err.response?.data?.message || "Ukuran file mungkin terlalu besar (maks 5MB).",
@@ -110,7 +104,7 @@ export default function ProfileInfoTab({ user }: { user: UserProfile }) {
           />
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="flex items-center space-x-4">
-              <Avatar className="h-20 w-20">
+              <Avatar className="h-20 w-20" key={avatarSrc}>
                 <AvatarImage src={avatarSrc} alt={user.name} />
                 <AvatarFallback className="text-2xl font-bold">
                   {user.name?.charAt(0).toUpperCase()}
@@ -128,12 +122,10 @@ export default function ProfileInfoTab({ user }: { user: UserProfile }) {
               <div className="space-y-2">
                 <Label htmlFor="name">Nama Lengkap</Label>
                 <Input id="name" {...form.register('name')} />
-                {form.formState.errors.name && <p className="text-red-500 text-sm mt-1">{form.formState.errors.name.message}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Nomor Telepon</Label>
                 <Input id="phone" {...form.register('phone')} placeholder="0812..." />
-                {form.formState.errors.phone && <p className="text-red-500 text-sm mt-1">{form.formState.errors.phone.message}</p>}
               </div>
             </div>
             <div className="space-y-2">
@@ -160,8 +152,9 @@ export default function ProfileInfoTab({ user }: { user: UserProfile }) {
             <Gift size={20} />
             Program Referral
           </CardTitle>
+          {/* [PERBAIKAN] Ubah teks dari 15.000 menjadi 10.000 */}
           <CardDescription>
-            Bagikan kode di bawah ini. Teman Anda akan mendapat kupon diskon saat mendaftar, dan Anda akan mendapat 15,000 poin!
+            Bagikan kode di bawah ini. Teman Anda akan mendapat kupon diskon saat mendaftar, dan Anda akan mendapat 10,000 poin!
           </CardDescription>
         </CardHeader>
         <CardContent>
